@@ -20,6 +20,22 @@ builder.Services.AddMediatR(config =>
 
 builder.Services.AddCarter();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+
+//Mannually register dependency injection for CachedBasketRepository
+//builder.Services.AddScoped<IBasketRepository>(provider =>
+//{
+//    var basketRepository = provider.GetService<IBasketRepository>();
+//    return new CachedBasketRepository(basketRepository!, provider.GetService<IDistributedCache>()!);
+//});
+
+//Using Scrutor library for decorate CachedBasketRepository
+builder.Services.Decorate<IBasketRepository, CachedBasketRepository>();
+
+builder.Services.AddStackExchangeRedisCache(opt =>
+{
+    opt.Configuration = builder.Configuration.GetConnectionString("RedisConnectionString");
+});
+
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
 var app = builder.Build();
