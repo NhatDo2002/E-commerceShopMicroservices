@@ -1,5 +1,3 @@
-using BuildingBlocks.Exceptions.Handler;
-
 var builder = WebApplication.CreateBuilder(args);
 
 //Adding Services and Depending Injection here
@@ -17,6 +15,9 @@ builder.Services.AddMediatR(config =>
     config.AddOpenBehavior(typeof(ValidationBehavior<,>));
     config.AddOpenBehavior(typeof(LoggingBehavior<,>));
 });
+
+builder.Services.AddHealthChecks()
+    .AddNpgSql(connectionString!);
 
 builder.Services.AddCarter();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
@@ -44,5 +45,10 @@ var app = builder.Build();
 app.MapCarter();
 
 app.UseExceptionHandler((opt) => { });
+
+app.UseHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 
 app.Run();
