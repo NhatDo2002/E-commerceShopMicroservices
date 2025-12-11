@@ -3,6 +3,7 @@ var builder = WebApplication.CreateBuilder(args);
 //Adding Services and Depending Injection here
 var assembly = typeof(Program).Assembly;
 var connectionString = builder.Configuration.GetConnectionString("BasketConnectionString");
+var redisConnectionString = builder.Configuration.GetConnectionString("RedisConnectionString");
 
 builder.Services.AddMarten(opt => {
     opt.Connection(connectionString!);
@@ -15,9 +16,6 @@ builder.Services.AddMediatR(config =>
     config.AddOpenBehavior(typeof(ValidationBehavior<,>));
     config.AddOpenBehavior(typeof(LoggingBehavior<,>));
 });
-
-builder.Services.AddHealthChecks()
-    .AddNpgSql(connectionString!);
 
 builder.Services.AddCarter();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
@@ -34,10 +32,14 @@ builder.Services.Decorate<IBasketRepository, CachedBasketRepository>();
 
 builder.Services.AddStackExchangeRedisCache(opt =>
 {
-    opt.Configuration = builder.Configuration.GetConnectionString("RedisConnectionString");
+    opt.Configuration = redisConnectionString!;
 });
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
+builder.Services.AddHealthChecks()
+    .AddNpgSql(connectionString!)
+    .AddRedis(redisConnectionString!);
 
 var app = builder.Build();
 
