@@ -40,6 +40,7 @@ builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 builder.Services.AddHealthChecks()
     .AddNpgSql(connectionString!)
     .AddRedis(redisConnectionString!);
+builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
 
