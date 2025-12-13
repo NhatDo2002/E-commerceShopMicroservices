@@ -1,15 +1,20 @@
+using Discount.Grpc;
+
 var builder = WebApplication.CreateBuilder(args);
 
 //Adding Services and Depending Injection here
+
+//Get configuration values
 var assembly = typeof(Program).Assembly;
 var connectionString = builder.Configuration.GetConnectionString("BasketConnectionString");
 var redisConnectionString = builder.Configuration.GetConnectionString("RedisConnectionString");
 
-builder.Services.AddMarten(opt => {
-    opt.Connection(connectionString!);
-    opt.Schema.For<ShoppingCart>().Identity(x => x.UserName);
-}).UseLightweightSessions();
+// - Application Services
 
+//Add Carter for minimal APIs
+builder.Services.AddCarter();
+
+//Add MediatR and register cross-cutting concerns behaviors
 builder.Services.AddMediatR(config =>
 {
     config.RegisterServicesFromAssembly(assembly);
@@ -17,7 +22,15 @@ builder.Services.AddMediatR(config =>
     config.AddOpenBehavior(typeof(LoggingBehavior<,>));
 });
 
-builder.Services.AddCarter();
+// - Data Services
+
+//Add MartenDB as document database
+builder.Services.AddMarten(opt => {
+    opt.Connection(connectionString!);
+    opt.Schema.For<ShoppingCart>().Identity(x => x.UserName);
+}).UseLightweightSessions();
+
+//Register BasketRepository and CachedBasketRepository dependency
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 
 //Mannually register dependency injection for CachedBasketRepository
@@ -30,16 +43,26 @@ builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 //Using Scrutor library for decorate CachedBasketRepository
 builder.Services.Decorate<IBasketRepository, CachedBasketRepository>();
 
+//Add Redis distributed cache
 builder.Services.AddStackExchangeRedisCache(opt =>
 {
     opt.Configuration = redisConnectionString!;
 });
 
-builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+//Add Grpc client for Discount.Grpc service
+builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(
+    option =>
+    {
+        option.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]!);
+    }
+);
 
+//Add cross-cutting concerns middleware
+builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 builder.Services.AddHealthChecks()
     .AddNpgSql(connectionString!)
     .AddRedis(redisConnectionString!);
+
 builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
