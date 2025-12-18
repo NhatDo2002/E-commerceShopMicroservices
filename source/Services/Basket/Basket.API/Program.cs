@@ -55,7 +55,15 @@ builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(
     {
         option.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]!);
     }
-);
+).ConfigurePrimaryHttpMessageHandler(() =>
+{
+    var handler = new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+    };
+
+    return handler;
+});
 
 //Add cross-cutting concerns middleware
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
