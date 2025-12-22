@@ -1,5 +1,6 @@
 ﻿namespace Ordering.Domain.ValueObjects
 {
+    [ComplexType]
     public record Address
     {
         public string FirstName { get; } = default!;
