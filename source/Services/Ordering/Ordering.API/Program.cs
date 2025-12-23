@@ -1,6 +1,7 @@
 using Ordering.API;
 using Ordering.Application;
 using Ordering.Infrastructure;
+using Ordering.Infrastructure.Data.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 //Add services to the container.
@@ -12,6 +13,12 @@ builder.Services
 var app = builder.Build();
 
 //Http request pipeline configuration.
+app.UseApiServices();
+
+if (app.Environment.IsDevelopment())
+{
+    await app.MigrationInitialDatabase();
+}
 
 app.MapGet("/", () => "Hello World!");
 
