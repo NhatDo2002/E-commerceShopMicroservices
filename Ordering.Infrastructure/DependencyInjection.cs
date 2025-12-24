@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Ordering.Infrastructure.Data.Interceptors;
 
@@ -11,9 +12,16 @@ namespace Ordering.Infrastructure
         {
             var connectionString = config.GetConnectionString("OrderingConnectionString");
 
-            services.AddDbContext<ApplicationDbContext>(option =>
+            //Register DispatchDomainEnventInterceptor and AuditableDatabaseInterceptor to ISaveChangesInterceptor,
+            //especially DispatchDomainEnventInterceptor when it need to pass IMediator argument.
+            //We cannot simply pass new IMediator in here, we should use DI to get it.
+            services.AddScoped<ISaveChangesInterceptor, AuditableDatabaseInterceptor>();
+            services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventInterceptor>();
+
+            services.AddDbContext<ApplicationDbContext>((serviceProvider, option) =>
             {
-                option.AddInterceptors(new AuditableDatabaseInterceptor());
+                //Now just use serviceProvider and get service ISaveChangesInterceptor that include both DispatchDomainEnventInterceptor and AuditableDatabaseInterceptor
+                option.AddInterceptors(serviceProvider.GetService<ISaveChangesInterceptor>()!);
                 option.UseSqlServer(connectionString);
             });
 
