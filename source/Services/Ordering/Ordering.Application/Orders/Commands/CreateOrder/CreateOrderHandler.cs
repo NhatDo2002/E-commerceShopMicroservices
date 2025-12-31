@@ -50,7 +50,7 @@
 
             foreach(var item in request.OrderItems)
             {
-                 order.AddOrderItem(ProductId.Of(item.ProductId), item.Quantity, item.Price)
+                order.AddOrderItem(ProductId.Of(item.ProductId), item.Quantity, item.Price);
             }
 
             return order;
