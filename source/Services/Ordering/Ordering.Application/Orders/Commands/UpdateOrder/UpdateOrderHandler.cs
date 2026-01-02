@@ -7,7 +7,7 @@
         {
             var orderId = OrderId.Of(command.OrderRequest.Id);
 
-            var order = await dbContext.Orders.FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
+            var order = await dbContext.Orders.Include(o => o.OrderItems).FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
             if(order == null)
             {
                 throw new OrderNotFoundException("Order", orderId);

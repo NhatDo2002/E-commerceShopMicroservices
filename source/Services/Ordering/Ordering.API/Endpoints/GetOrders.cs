@@ -16,6 +16,8 @@ namespace Ordering.API.Endpoints
                 var result = await sender.Send(query);
 
                 var response = result.Adapt<GetOrdersResponse>();
+
+                return Results.Ok(response); 
             })
             .WithName("Get Orders")
             .ProducesProblem(StatusCodes.Status400BadRequest)

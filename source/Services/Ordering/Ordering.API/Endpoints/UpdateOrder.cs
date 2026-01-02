@@ -1,4 +1,6 @@
-﻿namespace Ordering.API.Endpoints
+﻿using Ordering.Application.Orders.Commands.UpdateOrder;
+
+namespace Ordering.API.Endpoints
 {
     public record UpdateOrderRequest(OrderDto OrderRequest);
     public record UpdateOrderResponse(bool IsSuccess);
@@ -9,7 +11,7 @@
         {
             app.MapPut("/orders", async (UpdateOrderRequest request, ISender sender) =>
             {
-                var command = request.Adapt<UpdateOrderRequest>();
+                var command = request.Adapt<UpdateOrderCommand>();
 
                 var result = await sender.Send(command);
 

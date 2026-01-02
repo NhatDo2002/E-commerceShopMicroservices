@@ -5,9 +5,10 @@
     {
         public async Task<GetOrdersByNameResult> Handle(GetOrdersByNameQuery request, CancellationToken cancellationToken)
         {
+            var orderName = OrderName.Of(request.Name);
             var orders = await dbContext.Orders
                                    .Include(o => o.OrderItems)
-                                   .Where(o => o.OrderName.Value.Contains(request.Name))
+                                   .Where(o => o.OrderName == (orderName))
                                    .AsNoTracking()
                                    .ToListAsync(cancellationToken);
 
