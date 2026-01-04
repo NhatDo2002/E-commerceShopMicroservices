@@ -11,11 +11,12 @@ namespace Ordering.Application.Orders.Queries.GetOrdersByCustomerId
     {
         public async Task<GetOrdersByCustomerIdResult> Handle(GetOrdersByCustomerIdQuery query, CancellationToken cancellationToken)
         {
+            var customerId = CustomerId.Of(query.CustomerId);
             var orders = await dbContext.Orders
                                   .Include(o => o.OrderItems)
                                   .AsNoTracking()
-                                  .Where(o => o.CustomerId.Value == query.CustomerId)
-                                  .OrderBy(o => o.OrderName.Value)
+                                  .Where(o => o.CustomerId == customerId)
+                                  .OrderBy(o => o.OrderName)
                                   .ToListAsync(cancellationToken);
             return new GetOrdersByCustomerIdResult(orders.ConvertToListOrderDtos());
         }
