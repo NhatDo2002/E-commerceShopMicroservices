@@ -1,17 +1,24 @@
-﻿namespace Ordering.API
+﻿using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+
+namespace Ordering.API
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddApiServices(this IServiceCollection services)
+        public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddCarter();
+            services.AddHealthChecks().AddSqlServer(configuration.GetConnectionString("OrderingConnectionString")!);
             return services;
         }
 
         public static WebApplication UseApiServices(this WebApplication app)
         {
             app.MapCarter();
-
+            app.UseHealthChecks("/health", new HealthCheckOptions
+            {
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
             return app;
         }
     }
