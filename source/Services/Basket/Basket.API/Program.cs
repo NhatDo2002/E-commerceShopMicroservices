@@ -1,3 +1,4 @@
+using BuildingBlocks.Messaging.MassTransit;
 using Discount.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,6 +65,9 @@ builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(
 
     return handler;
 });
+
+//Add Message Broker - MassTransit with RabbitMQ
+builder.Services.AddMessageBroker(builder.Configuration);
 
 //Add cross-cutting concerns middleware
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();

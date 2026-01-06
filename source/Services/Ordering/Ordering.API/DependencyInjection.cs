@@ -1,5 +1,5 @@
 ﻿using BuildingBlocks.Exceptions.Handler;
-
+using BuildingBlocks.Messaging.MassTransit;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
