@@ -36,7 +36,6 @@
                                     Status: o.Status,
                                     TotalAmount: o.TotalAmount,
                                     OrderItems: o.OrderItems.Select(oi => new OrderItemDto(
-                                            Id: oi.Id.Value,
                                             OrderId: oi.OrderId.Value,
                                             ProductId: oi.ProductId.Value,
                                             Quantity: oi.Quantity,
