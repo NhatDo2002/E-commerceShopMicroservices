@@ -43,5 +43,68 @@
                                         )).ToList()
                          )).ToList();
         }
+
+        public static OrderDto ConvertToOrderDto(this Order order)
+        {
+            return AdaptToOrderDto(order);
+        }
+
+        private static OrderDto AdaptToOrderDto(Order order)
+        {
+            var billingAddressDto = new AddressDto(
+                    order.BillingAddress.FirstName,
+                    order.BillingAddress.LastName,
+                    order.BillingAddress.EmailAddress,
+                    order.BillingAddress.AddressLine,
+                    order.BillingAddress.Country,
+                    order.BillingAddress.State,
+                    order.BillingAddress.ZipCode
+                );
+
+            var shippingAddressDto = new AddressDto(
+                    order.ShippingAddress.FirstName,
+                    order.ShippingAddress.LastName,
+                    order.ShippingAddress.EmailAddress,
+                    order.ShippingAddress.AddressLine,
+                    order.ShippingAddress.Country,
+                    order.ShippingAddress.State,
+                    order.ShippingAddress.ZipCode
+                );
+
+            var paymentDto = new PaymentDto(
+                    order.Payment.CardName,
+                    order.Payment.CardNumber,
+                    order.Payment.Expiration,
+                    order.Payment.CVV,
+                    order.Payment.PaymentMethod
+                );
+
+            var listOrderItemDtos = new List<OrderItemDto>();
+
+            foreach(var oid in order.OrderItems)
+            {
+                var orderItemDto = new OrderItemDto(
+                        oid.OrderId.Value,
+                        oid.ProductId.Value,
+                        oid.Quantity,
+                        oid.Price
+                    );
+                listOrderItemDtos.Add(orderItemDto);
+            }
+
+            var orderDto = new OrderDto(
+                    order.Id.Value,
+                    order.CustomerId.Value,
+                    order.OrderName.Value,
+                    shippingAddressDto,
+                    billingAddressDto,
+                    paymentDto,
+                    order.Status,
+                    order.TotalAmount,
+                    listOrderItemDtos
+                );
+
+            return orderDto;
+        }
     }
 }

@@ -11,6 +11,8 @@ global using MediatR;
 global using Microsoft.Extensions.Logging;
 global using Ordering.Application.Extensions;
 global using BuildingBlocks.Pagination;
+global using MassTransit;
+
 
 
 
