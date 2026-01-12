@@ -1,5 +1,5 @@
-﻿using BuildingBlocks.Messaging.Events;
-using MassTransit;
+﻿
+using BuildingBlocks.Messaging.Events;
 using Microsoft.AspNetCore.Http;
 using Ordering.Application.Orders.Commands.CreateOrder;
 using Ordering.Domain.Enums;
@@ -8,9 +8,9 @@ namespace Ordering.Application.Orders.EventHandlers.Integration
 {
     public class BasketCheckoutEventHandler
         (ISender sender, ILogger<BasketCheckoutEventHandler> logger)
-        : IConsumer<BasketCheckoutEvent>
+        : IConsumer<CheckoutBasketEvent>
     {
-        public async Task Consume(ConsumeContext<BasketCheckoutEvent> context)
+        public async Task Consume(ConsumeContext<CheckoutBasketEvent> context)
         {
             logger.LogInformation("Integration event handle: {IntegrationEvent}", context.Message.GetType().Name);
             var command = MakeAdaptToCreateOrderCommand(context.Message);
@@ -18,7 +18,7 @@ namespace Ordering.Application.Orders.EventHandlers.Integration
             await sender.Send(command, context.CancellationToken);
         }
 
-        private CreateOrderCommand MakeAdaptToCreateOrderCommand(BasketCheckoutEvent basketCheckoutEvent)
+        private CreateOrderCommand MakeAdaptToCreateOrderCommand(CheckoutBasketEvent basketCheckoutEvent)
         {
             var addressDto = new AddressDto(
                     FirstName: basketCheckoutEvent.FirstName,

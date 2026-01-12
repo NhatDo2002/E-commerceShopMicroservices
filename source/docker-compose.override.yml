@@ -33,7 +33,7 @@ services:
     container_name: orderdb
     environment:
       - ACCEPT_EULA=Y
-      - nhat.dm_PASSWORD=Nhatdo@2002
+      - NHAT.DM_PASSWORD=Nhatdo@2002
     restart: always
     ports:
       - "1433:1433"
@@ -96,3 +96,25 @@ services:
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+  ordering.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__OrderingConnectionString=Server=orderdb;Database=OrderDb;User Id=nhat.dm;Password=Nhatdo@2002;Encrypt=False;TrustServerCertificate=True;
+      - RabbitMQ__Host=amqp://ecommerce-mq:5672
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+      - FeatureManagement__OrderFulfillment=false 
+    depends_on:
+      - orderdb
+      - messagebroker
+    ports:
+      - "6003:8080"
+      - "6063:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro

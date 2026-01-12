@@ -1,5 +1,4 @@
-﻿
-using BuildingBlocks.Messaging.Events;
+﻿using BuildingBlocks.Messaging.Events;
 using MassTransit;
 
 namespace Basket.API.Basket.CheckoutBasket
@@ -28,7 +27,7 @@ namespace Basket.API.Basket.CheckoutBasket
                 return new CheckoutBasketResult(false);
             }
 
-            var message = command.Adapt<BasketCheckoutEvent>();
+            var message = command.Adapt<CheckoutBasketEvent>();
             message.TotalPrice = getBasket.ToTalPrice;
 
             await publishEndpoint.Publish(message, cancellationToken);

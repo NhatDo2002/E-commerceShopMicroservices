@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BuildingBlocks.Messaging.Events
+﻿namespace BuildingBlocks.Messaging.Events
 {
-    public record BasketCheckoutEvent : IntegrationEvent
+    public record CheckoutBasketEvent : IntegrationEvent
     {
         public string UserName { get; set; } = default!;
         public Guid CustomId { get; set; } = default!;
