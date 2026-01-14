@@ -40,7 +40,7 @@ namespace Ordering.Application.Orders.EventHandlers.Integration
 
             var orderDto = new OrderDto(
                     Id: orderId,
-                    CustomerId: basketCheckoutEvent.CustomId,
+                    CustomerId: basketCheckoutEvent.CustomerId,
                     OrderName: basketCheckoutEvent.UserName,
                     ShippingAddress: addressDto,
                     BillingAddress: addressDto,

@@ -27,7 +27,7 @@ namespace Basket.API.Basket.CheckoutBasket
                 return new CheckoutBasketResult(false);
             }
 
-            var message = command.Adapt<CheckoutBasketEvent>();
+            var message = command.BasketCheckoutDto.Adapt<CheckoutBasketEvent>();
             message.TotalPrice = getBasket.ToTalPrice;
 
             await publishEndpoint.Publish(message, cancellationToken);

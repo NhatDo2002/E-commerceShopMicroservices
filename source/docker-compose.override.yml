@@ -1,3 +1,7 @@
+networks:
+  backend:
+    driver: bridge
+
 services:
   catalogdb:
     container_name: catalogdb
@@ -8,6 +12,8 @@ services:
     restart: always
     ports:
       - "5434:5432"
+    networks:
+      - backend
     volumes:
       - postgres_catalog:/var/lib/postgresql/
 
@@ -20,6 +26,8 @@ services:
     restart: always
     ports:
       - "5436:5432"
+    networks:
+      - backend
     volumes:
       - postgres_basket:/var/lib/postgresql/
   
@@ -28,15 +36,19 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    networks:
+      - backend
 
   orderdb:
     container_name: orderdb
     environment:
       - ACCEPT_EULA=Y
-      - NHAT.DM_PASSWORD=Nhatdo@2002
+      - SA_PASSWORD=Nhatdo@2002
     restart: always
     ports:
-      - "1433:1433"
+      - "14330:1433"
+    networks:
+      - backend
 
   messagebroker:
     container_name: messagebroker
@@ -48,6 +60,8 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - backend
 
   catalog.api:
     environment:
@@ -60,6 +74,8 @@ services:
     ports:
       - "6000:8080"
       - "6060:8081"
+    networks:
+      - backend
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -71,13 +87,19 @@ services:
       - ASPNETCORE_HTTPS_PORTS=8081
       - ConnectionStrings__BasketConnectionString=Server=basketdb;Port=5432;Database=BasketDb;User Id=postgres;Password=Nhatdo@2002;Include Error Detail=true;
       - ConnectionStrings__RedisConnectionString=distributedcache:6379
+      - RabbitMQ__Host=amqp://ecommerce-mq:5672
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
       - GrpcSettings__DiscountUrl=https://discount.grpc:8081
     depends_on:
       - basketdb
       - distributedcache
+      - messagebroker 
     ports:
       - "6001:8080"
       - "6061:8081"
+    networks:
+      - backend
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
@@ -93,6 +115,8 @@ services:
     ports:
       - "6002:8080"
       - "6062:8081"
+    networks:
+      - backend
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -102,7 +126,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__OrderingConnectionString=Server=orderdb;Database=OrderDb;User Id=nhat.dm;Password=Nhatdo@2002;Encrypt=False;TrustServerCertificate=True;
+      - ConnectionStrings__OrderingConnectionString=Server=orderdb;Database=OrderDb;User Id=sa;Password=Nhatdo@2002;Encrypt=False;TrustServerCertificate=True;
       - RabbitMQ__Host=amqp://ecommerce-mq:5672
       - RabbitMQ__Username=guest
       - RabbitMQ__Password=guest
@@ -113,6 +137,27 @@ services:
     ports:
       - "6003:8080"
       - "6063:8081"
+    networks:
+      - backend
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  yarpapigateway:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Local
+      - ASPNETCORE_HTTP_PORTS=8080
+    depends_on:
+      - catalog.api
+      - basket.api
+      - ordering.api
+    ports:
+      - "6004:8080"
+      - "6064:8081"
+    networks:
+      - backend
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
